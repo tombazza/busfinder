@@ -1,0 +1,12 @@
+{
+	"repositories": [
+		{
+			"type": "composer",
+			"url": "https://packages.zendframework.com/"
+		}
+	],
+	"require": {
+		"zendframework/zend-http": "2.*",
+		"predis/predis": "v0.8.4"
+	}
+}
