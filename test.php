@@ -65,18 +65,4 @@ foreach($parts as $part) {
 	}
 }
 
-
-echo '<link rel="stylesheet" type="text/css" href="style.css">';
-foreach($stops as $stopName => $stop) {
-	foreach($stop as $bus_stand) {
-		echo '<div class="stand"><span class="flag">'.$bus_stand['data']['flag'].'</span> <h2>'.$bus_stand['data']['name'].'</h2>';
-		echo '<ul>';
-		foreach($bus_stand['buses'] as $bus) {
-			echo '<li><span class="route">'.$bus['route'].'</span>';
-			echo '<span class="destination">'.$bus['destination'].'</span>';
-			echo '<span class="expected">'.date('H:i:s', $bus['expected']).'</span></li>';
-		}
-		echo '</ul></div>';
-	}
-}
-
+echo json_encode($stops);
