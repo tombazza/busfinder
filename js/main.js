@@ -15,6 +15,16 @@ function init() {
 }
 
 function registerHandlers() {
+
+/*
+Processing logic:
+	postcode supplied:
+		validate postcode
+		if valid, take postcode and pass to search handler
+	no postcode supplied:
+		get nearest postcode using gps coordinates
+		pass lat/long to search handler
+*/
 	$('#search').submit(function(e) {
 		var query = $('#search input.search').text();
 		
@@ -22,5 +32,5 @@ function registerHandlers() {
 	});
 }
 
-$(document).ready(loadScript);
+$(document).ready(init);
 })(jQuery);
