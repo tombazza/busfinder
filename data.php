@@ -170,3 +170,12 @@ class Busfinder {
 header('Content-type: application/json');
 $bus = new Busfinder();
 echo json_encode($bus->byPostcode($_GET['pc']));
+
+
+/*
+
+Get nearest stops:
+http://countdown.api.tfl.gov.uk/interfaces/ura/instant?Circle=51.49598,-
+0.14191,250&StopPointState=0&ReturnList=StopCode1,StopPointName,Bearing,StopPointIndicator,
+StopPointType,Latitude,Longitude
+*/
