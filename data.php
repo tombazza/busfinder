@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', true);
+error_reporting(E_ALL);
+
 require_once 'vendor/autoload.php';
 
 class RedisCache {
@@ -80,6 +83,7 @@ class Busfinder {
 		$url = "http://countdown.api.tfl.gov.uk/interfaces/ura/instant_V1?Circle=".$lat.",".$long.",500&ReturnList=".$fields;
 		$key = 'busfinder_data_'.md5($url);
 		$data = $this->redis->getCacheData($key);
+                $data = false;
 		if($data) {
 			return json_decode($data, true);
 		} else {
@@ -100,6 +104,7 @@ class Busfinder {
 		                $i++;
 		        } else {
 		                $part = json_decode($part, true);
+                                $expected = round((($part[9] / 1000) - time()) / 60);
 		                $stops[$part[1]][$part[3]]['data'] = array(
 		                        'lat' => $part[4],
 		                        'lon' => $part[5],
@@ -110,7 +115,8 @@ class Busfinder {
 		                $stops[$part[1]][$part[3]]['buses'][] = array(
 		                        'route' => $part[6],
 		                        'destination' => $part[8],
-		                        'expected' => ($part[9] / 1000)
+		                        'expected' => $expected,
+                                        'actual_expected' => ($part[9] / 1000)
 		                );
 		        }
 		}
