@@ -6,27 +6,26 @@ require_once 'vendor/autoload.php';
 
 class RedisCache {
 
-        private $redis;
+	private $redis;
 
-        public function __construct() {
-                $this->redis = new Predis\Client();
-        }
+	public function __construct() {
+		$this->redis = new Predis\Client();
+	}
 
-        public function getCacheData($keyName) {
-                $result = $this->redis->get($keyName);
-                if ($result !== null) {
-                        return base64_decode($result);
-                }
-                return false;
-        }
+	public function getCacheData($keyName) {
+		$result = $this->redis->get($keyName);
+		if ($result !== null) {
+			return base64_decode($result);
+		}
+		return false;
+	}
 
-        public function setCacheData($keyName, $data, $expires = 0) {
-                $this->redis->set($keyName, base64_encode($data));
-                if ($expires > 0) {
-                        $this->redis->expire($keyName, $expires);
-                }
-        }
-
+	public function setCacheData($keyName, $data, $expires = 0) {
+		$this->redis->set($keyName, base64_encode($data));
+		if ($expires > 0) {
+			$this->redis->expire($keyName, $expires);
+		}
+	}
 }
 
 class Busfinder {
@@ -39,24 +38,24 @@ class Busfinder {
 
 	function loadUrl($url) {
 		$handle = new Zend\Http\Client();
-	        $handle->setOptions(array(
-	                'adapter' => 'Zend\Http\Client\Adapter\Curl',
-	                'curloptions' => array(
-	                        CURLOPT_FOLLOWLOCATION => true,
-	                        CURLOPT_MAXREDIRS => 5,
-	                        CURLOPT_TIMEOUT => 30,
-	                        CURLOPT_SSL_VERIFYPEER => false
-	                )
-	        ));
-	        $request = new Zend\Http\Request();
-	        $request->setUri($url);
-	        $handle->setRequest($request);
-	        $response = $handle->dispatch($request);
-	        if ($response->getStatusCode() == 200) {
-	                return $response->getBody();
-	        } else {
-	                return false;
-	        }
+		$handle->setOptions(array(
+			'adapter' => 'Zend\Http\Client\Adapter\Curl',
+			'curloptions' => array(
+				CURLOPT_FOLLOWLOCATION => true,
+				CURLOPT_MAXREDIRS => 5,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_SSL_VERIFYPEER => false
+			)
+		));
+		$request = new Zend\Http\Request();
+		$request->setUri($url);
+		$handle->setRequest($request);
+		$response = $handle->dispatch($request);
+		if ($response->getStatusCode() == 200) {
+				return $response->getBody();
+		} else {
+				return false;
+		}
 	}
 
 	function postcodeToCoord($postcode) {
@@ -83,7 +82,6 @@ class Busfinder {
 		$url = "http://countdown.api.tfl.gov.uk/interfaces/ura/instant_V1?Circle=".$lat.",".$long.",500&ReturnList=".$fields;
 		$key = 'busfinder_data_'.md5($url);
 		$data = $this->redis->getCacheData($key);
-                $data = false;
 		if($data) {
 			return json_decode($data, true);
 		} else {
@@ -99,26 +97,26 @@ class Busfinder {
 		$i = 0;
 		$stops = array();
 		foreach($parts as $part) {
-		        if($i == 0) {
-		                //print_r($part);
-		                $i++;
-		        } else {
-		                $part = json_decode($part, true);
-                                $expected = round((($part[9] / 1000) - time()) / 60);
-		                $stops[$part[1]][$part[3]]['data'] = array(
-		                        'lat' => $part[4],
-		                        'lon' => $part[5],
-		                        'flag' => $part[3],
-		                        'code' => $part[2],
-		                        'name' => $part[1]
-		                );
-		                $stops[$part[1]][$part[3]]['buses'][] = array(
-		                        'route' => $part[6],
-		                        'destination' => $part[8],
-		                        'expected' => $expected,
-                                        'actual_expected' => ($part[9] / 1000)
-		                );
-		        }
+			if($i == 0) {
+				//print_r($part);
+				$i++;
+			} else {
+				$part = json_decode($part, true);
+				$expected = round((($part[9] / 1000) - time()) / 60);
+				$stops[$part[1]][$part[3]]['data'] = array(
+					'lat' => $part[4],
+					'lon' => $part[5],
+					'flag' => $part[3],
+					'code' => $part[2],
+					'name' => $part[1]
+				);
+				$stops[$part[1]][$part[3]]['buses'][] = array(
+					'route' => $part[6],
+					'destination' => $part[8],
+					'expected' => $expected,
+					'actual_expected' => ($part[9] / 1000)
+				);
+			}
 		}
 		return $stops;
 	}
