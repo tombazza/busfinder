@@ -19,6 +19,9 @@
 
 	function init() {
 		loadMap();
+		$('.stops li').click(function() {
+			$(this).toggleClass('open');
+		});
 	}
 
 function registerHandlers() {

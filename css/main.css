@@ -1,6 +1,13 @@
 @charset "UTF-8";
 html{color:#000;background:#FFF;}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:text-top;}sub{vertical-align:text-bottom;}input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}input,textarea,select{font-size:100%;}legend{color:#000;}
 
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+    display: none;
+}
+
 html, body {
 	font-family: 'Open Sans', sans-serif;
 	font-size: 16px;
@@ -54,14 +61,11 @@ h2 {
 	border: 0px;
 	background-color: transparent;
 	height: 30px;
+	width: 88%;
 }
 
 .section-width {
 	padding: 1%;
-}
-
-.full-width {
-
 }
 
 .map {
@@ -74,6 +78,8 @@ h2 {
 	background-color: #5C0B0D;
 	padding: 2%;
 	border-bottom: 1px solid #330607;
+	position: relative;
+	cursor: pointer;
 }
 
 .stops .flag {
@@ -94,4 +100,22 @@ h2 {
 .stops .towards {
 	font-size: 0.8em;
 	color: #808080;
+}
+
+.stops ul li:after {
+	width: 0px;
+	height: 0px;
+	border-style: solid;
+	border-width: 8.7px 5px 0 5px;
+	border-color: #ffffff transparent transparent transparent;
+	content: "";
+	margin: auto 0;
+	position: absolute;
+	right: 5%;
+	top: 48%;
+}
+
+.stops ul li.open:after {
+	border-width: 0 5px 8.7px 5px;
+	border-color: transparent transparent #ffffff transparent;
 }
