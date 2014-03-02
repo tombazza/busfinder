@@ -1,18 +1,25 @@
 (function($) {
-var googleApiKey = 'AIzaSyDi6HPUir9lIRMhFAPKg14wRk5UBSVGh78';
-function loadMap() {
-  var mapOptions = {
-    zoom: 8,
-    center: new google.maps.LatLng(-34.397, 150.644)
-  };
+	var map,
+		mapOptions = {
+		zoom: 10,
+		center: new google.maps.LatLng(51.516281, -0.132945),
+		styles: [
+			{"featureType": "poi","stylers": [{"visibility": "off"}]},
+			{"featureType": "poi.park","elementType": "geometry","stylers": [{"visibility": "on"}]},
+			{"featureType": "poi.park","elementType": "labels.text","stylers": [{"visibility": "on"}]},
+			{"featureType": "transit.station.bus","stylers": [{"visibility": "off"}]}
+		],
+		disableDefaultUI: true
+	};
 
-  var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-}
+	function loadMap() {
+		map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+	}
 
 
-function init() {
-	loadMap();
-}
+	function init() {
+		loadMap();
+	}
 
 function registerHandlers() {
 
