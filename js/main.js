@@ -71,6 +71,11 @@
 			stopId = stop.attr('data-stopid'),
 			url = dataUrl + '?mode=buses&stopid=' + stopId,
 			template = $('#bus_entry').html();
+		if(stop.hasClass('open')) {
+			stop.removeClass('open');
+			$('.stops .buses').remove();
+			return;
+		}
 		showLoading();
 		$.getJSON(url, function(response) {
 			var html = '<div class="buses">';
