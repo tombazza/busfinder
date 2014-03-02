@@ -113,6 +113,11 @@ h2 {
 	color: #808080;
 }
 
+.stops ul.display li {
+	display: none;
+	border-bottom-width: 0;
+}
+
 .stops ul li:before {
 	width: 0px;
 	height: 0px;
@@ -122,6 +127,10 @@ h2 {
 	content: "";
 	margin-top: 2%;
 	float: right;
+}
+
+.stops ul.display li.open {
+	display: block;
 }
 
 .stops ul li.open:before {

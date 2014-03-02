@@ -3,6 +3,8 @@
 		geocoder,
 		searchBox,
 		map,
+		stopLocations = [],
+		stopMarkers = [],
 		markers = [],
 		location,
 		dataUrl = '/data.php',
@@ -48,11 +50,16 @@
 				html = '',
 				template = $('#stop_li').html(),
 				bounds = new google.maps.LatLngBounds();
+			stopLocations = [];
+			stopMarkers = [];
 			list.html('');
+			setLocationMarker();
 			bounds.extend(location);
 			$.each(response, function(key, stop) {
 				html += Mustache.render(template, stop);
 				var stopLatLng = new google.maps.LatLng(stop.lat, stop.lng);
+				stopLocations['stop_'+stop.id] = stopLatLng;
+				stopMarkers.push(stopLatLng);
 				bounds.extend(stopLatLng);
 				markers.push(new google.maps.Marker({
 					position: stopLatLng,
@@ -66,16 +73,49 @@
 		});
 	}
 	
+	function clearAllMarkers() {
+		$.each(markers, function(k, marker) {
+			marker.setMap(null);
+		});
+	}
+	
+	function setLocationMarker() {
+		markers.push(new google.maps.Marker({
+			position: location,
+			map: map,
+			icon: '/img/gps.png'
+		}));
+	}
+	
+	function showAllStops() {
+		clearAllMarkers();
+		setLocationMarker();
+		var bounds = new google.maps.LatLngBounds();
+		bounds.extend(location);
+		$.each(stopMarkers, function(k, stopLatLng) {
+			markers.push(new google.maps.Marker({
+				position: stopLatLng,
+				map: map
+			}));
+			bounds.extend(stopLatLng);
+		});
+		map.fitBounds(bounds);
+	}
+	
 	function getStopData(e) {
 		var stop = $(this),
 			stopId = stop.attr('data-stopid'),
 			url = dataUrl + '?mode=buses&stopid=' + stopId,
 			template = $('#bus_entry').html();
+	
 		if(stop.hasClass('open')) {
+			showAllStops();
+			stop.parent('ul').removeClass('display');
 			stop.removeClass('open');
 			$('.stops .buses').remove();
 			return;
 		}
+		
 		showLoading();
 		$.getJSON(url, function(response) {
 			var html = '<div class="buses">';
@@ -88,8 +128,20 @@
 				html += Mustache.render(template, stop);
 			});
 			html += '</div>';
+			clearAllMarkers();
+			setLocationMarker();
+			var bounds = new google.maps.LatLngBounds();
+			var stopLatLng = stopLocations['stop_' + stopId];
+			bounds.extend(stopLatLng);
+			markers.push(new google.maps.Marker({
+				position: stopLatLng,
+				map: map
+			}));
+			bounds.extend(location);
+			map.fitBounds(bounds);
 			$('.stops .open').removeClass('open');
 			$('.stops .buses').remove();
+			stop.parent('ul').addClass('display');
 			stop.addClass('open');
 			stop.append(html);
 			hideLoading();
