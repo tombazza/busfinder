@@ -109,20 +109,36 @@ h2 {
 	color: #808080;
 }
 
-.stops ul li:after {
+.stops ul li:before {
 	width: 0px;
 	height: 0px;
 	border-style: solid;
 	border-width: 8.7px 5px 0 5px;
 	border-color: #ffffff transparent transparent transparent;
 	content: "";
-	margin: auto 0;
-	position: absolute;
-	right: 5%;
-	top: 48%;
+	margin-top: 2%;
+	float: right;
 }
 
-.stops ul li.open:after {
+.stops ul li.open:before {
 	border-width: 0 5px 8.7px 5px;
 	border-color: transparent transparent #ffffff transparent;
+}
+
+.buses {
+	background-color: #FFFFFF;
+	color: #3e3e3e;
+	padding: 1%;
+	margin-top: 2%;
+	font-size: 0.8em;
+}
+
+.stops .bus .route {
+	float: left;
+	font-weight: bold;
+	width: 35px;
+}
+
+.stops .bus .expected {
+	float: right;
 }

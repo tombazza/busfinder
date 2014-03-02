@@ -1,21 +1,22 @@
 (function($) {
 	var defaultSearchText = 'Enter your location...',
-			geocoder,
-			searchBox,
-			map,
-			location,
-			dataUrl = '/data.php',
-			mapOptions = {
-				zoom: 10,
-				center: new google.maps.LatLng(51.516281, -0.132945),
-				styles: [
-					{"featureType": "poi", "stylers": [{"visibility": "off"}]},
-					{"featureType": "poi.park", "elementType": "geometry", "stylers": [{"visibility": "on"}]},
-					{"featureType": "poi.park", "elementType": "labels.text", "stylers": [{"visibility": "on"}]},
-					{"featureType": "transit.station.bus", "stylers": [{"visibility": "off"}]}
-				],
-				disableDefaultUI: true
-			};
+		geocoder,
+		searchBox,
+		map,
+		markers = [],
+		location,
+		dataUrl = '/data.php',
+		mapOptions = {
+			zoom: 10,
+			center: new google.maps.LatLng(51.516281, -0.132945),
+			styles: [
+				{"featureType": "poi", "stylers": [{"visibility": "off"}]},
+				{"featureType": "poi.park", "elementType": "geometry", "stylers": [{"visibility": "on"}]},
+				{"featureType": "poi.park", "elementType": "labels.text", "stylers": [{"visibility": "on"}]},
+				{"featureType": "transit.station.bus", "stylers": [{"visibility": "off"}]}
+			],
+			disableDefaultUI: true
+		};
 
 	function init() {
 		geocoder = new google.maps.Geocoder();
@@ -25,6 +26,7 @@
 	}
 
 	function processSearch(e) {
+		showLoading();
 		e.preventDefault();
 		geocoder.geocode({'address': searchBox.val() + ', UK'}, function(results, status) {
 			if (status == google.maps.GeocoderStatus.OK) {
@@ -36,23 +38,76 @@
 
 		return false;
 	}
-
-	function processNavigatorCoords(coords) {
-		var latlng = new google.maps.LatLng(coords.coords.latitude, coords.coords.longitude);
-		searchByLatLng(latlng);
-	}
 	
 	function searchByLatLng(latlng) {
 		location = latlng;
 		var url = dataUrl + '?mode=stops&lat=' + latlng.lat() + '&lng=' + latlng.lng();
 		$.getJSON(url, function(response) {
-			console.log(response);
+			hideLoading();
+			var list = $('.stops ul'),
+				html = '',
+				template = $('#stop_li').html(),
+				bounds = new google.maps.LatLngBounds();
+			list.html('');
+			bounds.extend(location);
+			$.each(response, function(key, stop) {
+				html += Mustache.render(template, stop);
+				var stopLatLng = new google.maps.LatLng(stop.lat, stop.lng);
+				bounds.extend(stopLatLng);
+				markers.push(new google.maps.Marker({
+					position: stopLatLng,
+					map: map
+				}));
+			});
+			map.fitBounds(bounds);
+			list.html(html);
+			$('.stops ul li').click(getStopData);
+			$('.welcome').remove();
 		});
 	}
 	
+	function getStopData(e) {
+		var stop = $(this),
+			stopId = stop.attr('data-stopid'),
+			url = dataUrl + '?mode=buses&stopid=' + stopId,
+			template = $('#bus_entry').html();
+		showLoading();
+		$.getJSON(url, function(response) {
+			var html = '<div class="buses">';
+			$.each(response, function(key, stop) {
+				if(stop.expected < 1) {
+					stop.expected = 'Due';
+				} else {
+					stop.expected = stop.expected + 'min';
+				}
+				html += Mustache.render(template, stop);
+			});
+			html += '</div>';
+			$('.stops .open').removeClass('open');
+			$('.stops .buses').remove();
+			stop.addClass('open');
+			stop.append(html);
+			hideLoading();
+		});
+	}
+	
+	function showLoading() {
+		$('.search-area').addClass('loading');
+	}
+	
+	function hideLoading() {
+		$('.search-area').removeClass('loading');
+	}
+	
+	/* TODO: add reverse geocoding for lat/lng */
+	
 	function handleLocationLookup(e) {
+		showLoading();
 		e.preventDefault();
-		navigator.geolocation.getCurrentPosition(processNavigatorCoords, errorHandler, {
+		navigator.geolocation.getCurrentPosition(function(coords) {
+			var latlng = new google.maps.LatLng(coords.coords.latitude, coords.coords.longitude);
+			searchByLatLng(latlng);
+		}, errorHandler, {
 			enableHighAccuracy: true, timeout: 10000, maximumAge: 300000
 		});
 		return false;

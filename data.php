@@ -58,11 +58,12 @@ class Busfinder {
 		return $this->getBusData($coords['result']['latitude'], $coords['result']['longitude']);
 	}
 
-	private function getBusData($lat, $long) {
-		$fields = 'StopCode1,StopPointIndicator,StopPointName,LineName,EstimatedTime,Latitude,Longitude,DirectionID,DestinationName,ExpireTime';
-		$url = "http://countdown.api.tfl.gov.uk/interfaces/ura/instant_V1?Circle=".$lat.",".$long.",500&ReturnList=".$fields;
+	public function getBusData($stopId) {
+		$fields = 'LineName,EstimatedTime,DestinationName';
+		$url = "?StopCode1=".$stopId."&ReturnList=".$fields;
 		$key = 'busfinder_data_'.md5($url);
 		$data = $this->redis->getCacheData($key);
+		$data = false;
 		if($data) {
 			return json_decode($data, true);
 		} else {
@@ -75,31 +76,27 @@ class Busfinder {
 
 	private function parseResponseData($data) {
 		$parts = explode("\n", $data);
-		$i = 0;
-		$stops = array();
+		unset($parts[0]);
+		$buses = array();
 		foreach($parts as $part) {
-			if($i == 0) {
-				//print_r($part);
-				$i++;
-			} else {
-				$part = json_decode($part, true);
-				$expected = round((($part[9] / 1000) - time()) / 60);
-				$stops[$part[1]][$part[3]]['data'] = array(
-					'lat' => $part[4],
-					'lon' => $part[5],
-					'flag' => $part[3],
-					'code' => $part[2],
-					'name' => $part[1]
-				);
-				$stops[$part[1]][$part[3]]['buses'][] = array(
-					'route' => $part[6],
-					'destination' => $part[8],
-					'expected' => $expected,
-					'actual_expected' => ($part[9] / 1000)
-				);
-			}
+			$part = json_decode($part, true);
+			$expected = round((($part[3] / 1000) - time()) / 60);
+			$buses[] = array(
+				'route' => $part[1], 
+				'destination' => $part[2],
+				'expected' => $expected,
+				'actual_expected' => ($part[3] / 1000)
+			);
 		}
-		return $stops;
+		usort($buses, array($this, 'sortBusArray'));
+		return $buses;
+	}
+	
+	function sortBusArray($a, $b) {
+		if ($a['actual_expected'] == $b['actual_expected']) {
+			return 0;
+		}
+		return ($a['actual_expected'] < $b['actual_expected']) ? -1 : 1;
 	}
 
 	/**
@@ -154,7 +151,7 @@ class Busfinder {
 	private $hiddenStops = array('STBE','STCC','STTS','STTP','STDM','STCR','STDL','STDJ','SHCP','SHCE','SLRS');
 	
 	public function getStopsByCoord($lat, $lng) {
-		$path = '?Circle='.$lat.','.$lng.',350&StopPointState=0&ReturnList=StopPointName,StopPointIndicator,StopPointType,Towards,Latitude,Longitude';
+		$path = '?Circle='.$lat.','.$lng.',350&StopPointState=0&ReturnList=StopCode1,StopPointName,StopPointIndicator,StopPointType,Towards,Latitude,Longitude';
 		$key = 'busfinder_stops_'.sha1($path);
 		$data = $this->redis->getCacheData($key);
 		if(!$data) {
@@ -165,13 +162,14 @@ class Busfinder {
 				$stops = array();
 				foreach($parts as $stop) {
 					$stop = json_decode($stop, true);
-					if(!in_array($stop[2], $this->hiddenStops)) {
+					if(!in_array($stop[3], $this->hiddenStops) && $stop[2]) {
 						$stops[] = array(
+							'id' => $stop[2],
 							'name' => ucwords(strtolower($stop[1])),
-							'towards' => $stop[3],
-							'flag' => $stop[4],
-							'lat' => $stop[5],
-							'lng' => $stop[6]
+							'towards' => $stop[4],
+							'flag' => $stop[5],
+							'lat' => $stop[6],
+							'lng' => $stop[7]
 						);
 					}
 				}
@@ -217,9 +215,9 @@ if($mode == 'stops') {
 	$lat = filter_input(INPUT_GET, 'lat', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION | FILTER_FLAG_ALLOW_THOUSAND);
 	$lng = filter_input(INPUT_GET, 'lng', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION | FILTER_FLAG_ALLOW_THOUSAND);
 	$response = $bus->getStopsByCoord($lat, $lng);
-	
 } elseif($mode == 'buses') {
-	
+	$stopId = filter_input(INPUT_GET, 'stopid', FILTER_SANITIZE_NUMBER_FLOAT);
+	$response = $bus->getBusData($stopId);
 } elseif(mode == 'vehicle') {
 	
 } else {
