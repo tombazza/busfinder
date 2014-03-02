@@ -4,6 +4,7 @@
 			searchBox,
 			map,
 			location,
+			dataUrl = '/data.php',
 			mapOptions = {
 				zoom: 10,
 				center: new google.maps.LatLng(51.516281, -0.132945),
@@ -27,7 +28,7 @@
 		e.preventDefault();
 		geocoder.geocode({'address': searchBox.val() + ', UK'}, function(results, status) {
 			if (status == google.maps.GeocoderStatus.OK) {
-				processCoords(results[0].geometry.location);
+				searchByLatLng(results[0].geometry.location);
 			} else {
 				alert(address + ' not recognized.');
 			}
@@ -37,20 +38,18 @@
 	}
 
 	function processNavigatorCoords(coords) {
-		
+		var latlng = new google.maps.LatLng(coords.coords.latitude, coords.coords.longitude);
+		searchByLatLng(latlng);
 	}
 	
-	function processCoords(coord) {
-		console.log(coord);
-		console.log(typeof coord);
+	function searchByLatLng(latlng) {
+		location = latlng;
+		var url = dataUrl + '?mode=stops&lat=' + latlng.lat() + '&lng=' + latlng.lng();
+		$.getJSON(url, function(response) {
+			console.log(response);
+		});
 	}
 	
-	function searchByCoords(lat, long) {
-		
-	}
-	
-	
-
 	function handleLocationLookup(e) {
 		e.preventDefault();
 		navigator.geolocation.getCurrentPosition(processNavigatorCoords, errorHandler, {

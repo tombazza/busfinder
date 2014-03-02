@@ -31,32 +31,13 @@ class RedisCache {
 class Busfinder {
 
 	private $redis;
+	private $tflDataPath = 'http://countdown.api.tfl.gov.uk/interfaces/ura/instant_V1';
 
 	public function __construct() {
 		$this->redis = new RedisCache();
 	}
 
-	function loadUrl($url) {
-		$handle = new Zend\Http\Client();
-		$handle->setOptions(array(
-			'adapter' => 'Zend\Http\Client\Adapter\Curl',
-			'curloptions' => array(
-				CURLOPT_FOLLOWLOCATION => true,
-				CURLOPT_MAXREDIRS => 5,
-				CURLOPT_TIMEOUT => 30,
-				CURLOPT_SSL_VERIFYPEER => false
-			)
-		));
-		$request = new Zend\Http\Request();
-		$request->setUri($url);
-		$handle->setRequest($request);
-		$response = $handle->dispatch($request);
-		if ($response->getStatusCode() == 200) {
-				return $response->getBody();
-		} else {
-				return false;
-		}
-	}
+	
 
 	function postcodeToCoord($postcode) {
 		$postcode_clean = strtolower(preg_replace("/[^a-z0-9.]+/i", "", $postcode));
@@ -169,11 +150,83 @@ class Busfinder {
 		$angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) + cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
 		return $angle * $earthRadius;
 	}
+	
+	private $hiddenStops = array('STBE','STCC','STTS','STTP','STDM','STCR','STDL','STDJ','SHCP','SHCE','SLRS');
+	
+	public function getStopsByCoord($lat, $lng) {
+		$path = '?Circle='.$lat.','.$lng.',350&StopPointState=0&ReturnList=StopPointName,StopPointIndicator,StopPointType,Towards,Latitude,Longitude';
+		$key = 'busfinder_stops_'.sha1($path);
+		$data = $this->redis->getCacheData($key);
+		if(!$data) {
+			$response = $this->loadUrl($path);
+			if($response) {
+				$parts = explode("\n", $response);
+				unset($parts[0]);
+				$stops = array();
+				foreach($parts as $stop) {
+					$stop = json_decode($stop, true);
+					if(!in_array($stop[2], $this->hiddenStops)) {
+						$stops[] = array(
+							'name' => ucwords(strtolower($stop[1])),
+							'towards' => $stop[3],
+							'flag' => $stop[4],
+							'lat' => $stop[5],
+							'lng' => $stop[6]
+						);
+					}
+				}
+				$this->redis->setCacheData($key, json_encode($stops), 60);
+				return $stops;
+			}
+		} else {
+			return json_decode($data, true);
+		}
+	}
+	
+	private function loadUrl($url) {
+		$handle = new Zend\Http\Client();
+		$handle->setOptions(array(
+			'adapter' => 'Zend\Http\Client\Adapter\Curl',
+			'curloptions' => array(
+				CURLOPT_FOLLOWLOCATION => true,
+				CURLOPT_MAXREDIRS => 5,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_SSL_VERIFYPEER => false
+			)
+		));
+		$request = new Zend\Http\Request();
+		$url = $this->tflDataPath . $url;
+		$request->setUri($url);
+		$handle->setRequest($request);
+		$response = $handle->dispatch($request);
+		if ($response->getStatusCode() == 200) {
+				return $response->getBody();
+		} else {
+				return false;
+		}
+	}
+	
 }
 
 header('Content-type: application/json');
 $bus = new Busfinder();
-echo json_encode($bus->byPostcode($_GET['pc']));
+
+$mode = filter_input(INPUT_GET, 'mode', FILTER_SANITIZE_STRING);
+
+if($mode == 'stops') {
+	$lat = filter_input(INPUT_GET, 'lat', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION | FILTER_FLAG_ALLOW_THOUSAND);
+	$lng = filter_input(INPUT_GET, 'lng', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION | FILTER_FLAG_ALLOW_THOUSAND);
+	$response = $bus->getStopsByCoord($lat, $lng);
+	
+} elseif($mode == 'buses') {
+	
+} elseif(mode == 'vehicle') {
+	
+} else {
+	exit;
+}
+
+echo json_encode($response);
 
 
 /*
