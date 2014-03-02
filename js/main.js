@@ -57,14 +57,17 @@
 			bounds.extend(location);
 			$.each(response, function(key, stop) {
 				html += Mustache.render(template, stop);
-				var stopLatLng = new google.maps.LatLng(stop.lat, stop.lng);
-				stopLocations['stop_'+stop.id] = stopLatLng;
-				stopMarkers.push(stopLatLng);
-				bounds.extend(stopLatLng);
-				markers.push(new google.maps.Marker({
-					position: stopLatLng,
+				stop.latlng = new google.maps.LatLng(stop.lat, stop.lng);
+				stopMarkers.push(stop);
+				bounds.extend(stop.latlng);
+				var stopMarker = new google.maps.Marker({
+					position: stop.latlng,
 					map: map
-				}));
+				});
+				google.maps.event.addListener(stopMarker, 'click', function() {
+					loadStopData(stop.id);
+				});
+				markers.push(stopMarker);
 			});
 			map.fitBounds(bounds);
 			list.html(html);
@@ -86,24 +89,28 @@
 			icon: '/img/gps.png'
 		}));
 	}
-	
+
 	function showAllStops() {
 		clearAllMarkers();
 		setLocationMarker();
 		var bounds = new google.maps.LatLngBounds();
 		bounds.extend(location);
-		$.each(stopMarkers, function(k, stopLatLng) {
-			markers.push(new google.maps.Marker({
-				position: stopLatLng,
+		$.each(stopMarkers, function(k, stop) {
+			var marker = new google.maps.Marker({
+				position: stop.latlng,
 				map: map
-			}));
-			bounds.extend(stopLatLng);
+			});
+			google.maps.event.addListener(marker, 'click', function() {
+				loadStopData(stop.id);
+			});
+			markers.push(marker);
+			bounds.extend(stop.latlng);
 		});
 		map.fitBounds(bounds);
 	}
 	
-	function getStopData(e) {
-		var stop = $(this),
+	function loadStopData(target) {
+		var stop = $('.stops li[data-stopid="'+target+'"]'),
 			stopId = stop.attr('data-stopid'),
 			url = dataUrl + '?mode=buses&stopid=' + stopId,
 			template = $('#bus_entry').html();
@@ -130,8 +137,15 @@
 			html += '</div>';
 			clearAllMarkers();
 			setLocationMarker();
-			var bounds = new google.maps.LatLngBounds();
-			var stopLatLng = stopLocations['stop_' + stopId];
+			var bounds = new google.maps.LatLngBounds(),
+				stopLatLng;
+				console.log(stopMarkers);
+			$.each(stopMarkers, function(k, stop){
+				if(stop.id == stopId) {
+					stopLatLng = stop.latlng;
+					return false;
+				}
+			});
 			bounds.extend(stopLatLng);
 			markers.push(new google.maps.Marker({
 				position: stopLatLng,
@@ -139,6 +153,7 @@
 			}));
 			bounds.extend(location);
 			map.fitBounds(bounds);
+			
 			$('.stops .open').removeClass('open');
 			$('.stops .buses').remove();
 			stop.parent('ul').addClass('display');
@@ -146,6 +161,10 @@
 			stop.append(html);
 			hideLoading();
 		});
+	}
+	
+	function getStopData(e) {
+		loadStopData($(this).attr('data-stopid'));
 	}
 	
 	function showLoading() {
