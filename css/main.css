@@ -81,6 +81,10 @@ h2 {
 	border-bottom: 5px solid #FFFFFF;
 }
 
+.stops p {
+	padding: 0 2% 0;
+}
+
 .stops ul li {
 	background-color: #5C0B0D;
 	padding: 2%;
