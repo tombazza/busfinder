@@ -37,33 +37,11 @@ class Busfinder {
 		$this->redis = new RedisCache();
 	}
 
-	
-
-	function postcodeToCoord($postcode) {
-		$postcode_clean = strtolower(preg_replace("/[^a-z0-9.]+/i", "", $postcode));
-		$url = "http://api.postcodes.io/postcodes/".$postcode_clean;
-		$key = 'busfinder_pc_'.$postcode_clean;
-		$data = $this->redis->getCacheData($key);
-		if($data) {
-			return json_decode($data, true);
-		} else {
-			$response = $this->loadUrl($url);
-			$this->redis->setCacheData($key, $response, 86400);
-			return json_decode($response, true);
-		}
-	}
-
-	public function byPostcode($postcode) {
-		$coords = $this->postcodeToCoord($postcode);
-		return $this->getBusData($coords['result']['latitude'], $coords['result']['longitude']);
-	}
-
 	public function getBusData($stopId) {
 		$fields = 'LineName,EstimatedTime,DestinationName';
 		$url = "?StopCode1=".$stopId."&ReturnList=".$fields;
 		$key = 'busfinder_data_'.md5($url);
 		$data = $this->redis->getCacheData($key);
-		$data = false;
 		if($data) {
 			return json_decode($data, true);
 		} else {
@@ -151,7 +129,7 @@ class Busfinder {
 	private $hiddenStops = array('STBE','STCC','STTS','STTP','STDM','STCR','STDL','STDJ','SHCP','SHCE','SLRS');
 	
 	public function getStopsByCoord($lat, $lng) {
-		$path = '?Circle='.$lat.','.$lng.',350&StopPointState=0&ReturnList=StopCode1,StopPointName,StopPointIndicator,StopPointType,Towards,Latitude,Longitude';
+		$path = '?Circle='.$lat.','.$lng.',250&StopPointState=0&ReturnList=StopCode1,StopPointName,StopPointIndicator,StopPointType,Towards,Latitude,Longitude';
 		$key = 'busfinder_stops_'.sha1($path);
 		$data = $this->redis->getCacheData($key);
 		if(!$data) {
@@ -173,7 +151,7 @@ class Busfinder {
 						);
 					}
 				}
-				$this->redis->setCacheData($key, json_encode($stops), 60);
+				$this->redis->setCacheData($key, json_encode($stops), 86400);
 				return $stops;
 			}
 		} else {
