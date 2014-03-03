@@ -29,10 +29,10 @@
 		},
 		stopMarkerIcon = {
 			url: '/img/marker.png',
-			size: new google.maps.Size(60, 60),
+			size: new google.maps.Size(40, 40),
 			origin: new google.maps.Point(0,0),
-			anchor: new google.maps.Point(15,15),
-			scaledSize: new google.maps.Size(30, 30)
+			anchor: new google.maps.Point(10,10),
+			scaledSize: new google.maps.Size(20, 20)
 		};
 
 	function init() {
