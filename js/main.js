@@ -19,6 +19,20 @@
 				{"featureType": "transit.station.bus", "stylers": [{"visibility": "off"}]}
 			],
 			disableDefaultUI: true
+		},
+		gpsMarkerIcon = {
+			url: '/img/gps.png',
+			size: new google.maps.Size(60, 60),
+			origin: new google.maps.Point(0,0),
+			anchor: new google.maps.Point(15, 15),
+			scaledSize: new google.maps.Size(30, 30)
+		},
+		stopMarkerIcon = {
+			url: '/img/marker.png',
+			size: new google.maps.Size(30, 30),
+			origin: new google.maps.Point(0,0),
+			anchor: new google.maps.Point(7, 7),
+			scaledSize: new google.maps.Size(15, 15)
 		};
 
 	function init() {
@@ -69,7 +83,8 @@
 				bounds.extend(stop.latlng);
 				var stopMarker = new google.maps.Marker({
 					position: stop.latlng,
-					map: map
+					map: map,
+					icon: stopMarkerIcon
 				});
 				google.maps.event.addListener(stopMarker, 'click', function() {
 					var templateMapMarker = $("#map_marker").html();
@@ -99,7 +114,7 @@
 		markers.push(new google.maps.Marker({
 			position: location,
 			map: map,
-			icon: '/img/gps.png',
+			icon: gpsMarkerIcon,
 			zIndex: 999
 		}));
 	}
@@ -112,7 +127,8 @@
 		$.each(stopMarkers, function(k, stop) {
 			var marker = new google.maps.Marker({
 				position: stop.latlng,
-				map: map
+				map: map,
+				icon: stopMarkerIcon
 			});
 			google.maps.event.addListener(marker, 'click', function() {
 				loadStopData(stop.id);
@@ -162,7 +178,8 @@
 			bounds.extend(stopLatLng);
 			markers.push(new google.maps.Marker({
 				position: stopLatLng,
-				map: map
+				map: map,
+				icon: stopMarkerIcon
 			}));
 			bounds.extend(location);
 			map.fitBounds(bounds);
