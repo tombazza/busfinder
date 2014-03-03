@@ -19,7 +19,7 @@ html, body {
 
 h1 {
 	font-size: 1.5em;
-	margin: 2% 0;
+	margin: 1% 0;
 	font-weight: bold;
 	padding: 0 3% 0;
 }
@@ -34,7 +34,7 @@ h2 {
 .header {
 	background-color: #DC1A1F;
 	background-color: rgb(220, 26, 31);
-	border-bottom: 5px solid #FFFFFF;
+	border-bottom: 3px solid #FFFFFF;
 }
 
 .header .location {
@@ -78,7 +78,7 @@ h2 {
 .map {
 	width: 100%;
 	padding-bottom: 55%;
-	border-bottom: 5px solid #FFFFFF;
+	border-bottom: 3px solid #FFFFFF;
 }
 
 .stops p {
