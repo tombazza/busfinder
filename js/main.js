@@ -29,10 +29,10 @@
 		},
 		stopMarkerIcon = {
 			url: '/img/marker.png',
-			size: new google.maps.Size(30, 30),
+			size: new google.maps.Size(60, 60),
 			origin: new google.maps.Point(0,0),
-			anchor: new google.maps.Point(7, 7),
-			scaledSize: new google.maps.Size(15, 15)
+			anchor: new google.maps.Point(15,15),
+			scaledSize: new google.maps.Size(30, 30)
 		};
 
 	function init() {
@@ -90,9 +90,10 @@
 					var templateMapMarker = $("#map_marker").html();
 					if(infowindow) infowindow.close();
 					infowindow = new google.maps.InfoWindow({
-						content: Mustache.render(templateMapMarker, stop)
+						content: Mustache.render(templateMapMarker, stop),
+						position: stop.latlng
 					});
-					infowindow.open(map, stopMarker);//loadStopData(stop.id);
+					infowindow.open(map);//loadStopData(stop.id);
 				});
 				markers.push(stopMarker);
 			});
