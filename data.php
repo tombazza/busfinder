@@ -129,7 +129,7 @@ class Busfinder {
 	private $hiddenStops = array('STBE','STCC','STTS','STTP','STDM','STCR','STDL','STDJ','SHCP','SHCE','SLRS');
 	
 	public function getStopsByCoord($lat, $lng) {
-		$path = '?Circle='.$lat.','.$lng.',250&StopPointState=0&ReturnList=StopCode1,StopPointName,StopPointIndicator,StopPointType,Towards,Latitude,Longitude';
+		$path = '?Circle='.$lat.','.$lng.',500&StopPointState=0&ReturnList=StopCode1,StopPointName,StopPointIndicator,StopPointType,Towards,Latitude,Longitude';
 		$key = 'busfinder_stops_'.sha1($path);
 		$data = $this->redis->getCacheData($key);
 		if(!$data) {

@@ -82,6 +82,7 @@
 				markers.push(stopMarker);
 			});
 			map.fitBounds(bounds);
+			map.setZoom(15);
 			list.html(html);
 			$('.stops ul li').click(getStopData);
 			$('.welcome').remove();
@@ -98,7 +99,8 @@
 		markers.push(new google.maps.Marker({
 			position: location,
 			map: map,
-			icon: '/img/gps.png'
+			icon: '/img/gps.png',
+			zIndex: 999
 		}));
 	}
 
