@@ -93,7 +93,7 @@ h2 {
 	cursor: pointer;
 }
 
-.stops .flag {
+.stops .flag, .gm-style-iw .flag {
 	border-radius: 50%;
 	background-color: #DC1A1F;
 	background-color: rgb(220, 26, 31);
@@ -101,7 +101,7 @@ h2 {
 	display: block;
 	padding: 1%;
 	font-size: 0.8em;
-	font-weight: bold;
+	font-weight: bold !important;
 	width: 20px;
 	height: 20px;
 	text-align: center;
@@ -141,9 +141,9 @@ h2 {
 .buses {
 	background-color: #FFFFFF;
 	color: #3e3e3e;
-	padding: 1%;
+	padding: 2%;
 	margin: 2% -2% -2%;
-	font-size: 0.8em;
+	font-size: 0.9em;
 }
 
 .stops .bus .route {
@@ -154,4 +154,17 @@ h2 {
 
 .stops .bus .expected {
 	float: right;
+}
+
+.gm-style-iw, .gm-style-iw div {
+	overflow: hidden !important;
+}
+
+.gm-style-iw .name {
+	color: #3E3E3E;
+	padding: 1% 1% 1% 0;
+}
+
+.markercontainer {
+	width: 250px;
 }

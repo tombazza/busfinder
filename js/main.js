@@ -8,6 +8,7 @@
 		markers = [],
 		location,
 		dataUrl = '/data.php',
+		infowindow,
 		mapOptions = {
 			zoom: 10,
 			center: new google.maps.LatLng(51.516281, -0.132945),
@@ -65,7 +66,12 @@
 					map: map
 				});
 				google.maps.event.addListener(stopMarker, 'click', function() {
-					loadStopData(stop.id);
+					var templateMapMarker = $("#map_marker").html();
+					if(infowindow) infowindow.close();
+					infowindow = new google.maps.InfoWindow({
+						content: Mustache.render(templateMapMarker, stop)
+					});
+					infowindow.open(map, stopMarker);//loadStopData(stop.id);
 				});
 				markers.push(stopMarker);
 			});
