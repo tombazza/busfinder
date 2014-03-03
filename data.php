@@ -153,6 +153,8 @@ class Busfinder {
 				}
 				$this->redis->setCacheData($key, json_encode($stops), 86400);
 				return $stops;
+			} else {
+				return array();
 			}
 		} else {
 			return json_decode($data, true);
@@ -201,7 +203,6 @@ if($mode == 'stops') {
 } else {
 	exit;
 }
-
 echo json_encode($response);
 
 

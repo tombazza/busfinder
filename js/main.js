@@ -35,6 +35,7 @@
 			if (status == google.maps.GeocoderStatus.OK) {
 				searchByLatLng(results[0].geometry.location);
 			} else {
+				hideLoading();
 				alert(address + ' not recognized.');
 			}
 		});
@@ -46,6 +47,11 @@
 		location = latlng;
 		var url = dataUrl + '?mode=stops&lat=' + latlng.lat() + '&lng=' + latlng.lng();
 		$.getJSON(url, function(response) {
+			if(response.length == 0) {
+				hideLoading();
+				alert('Sorry no stops were found for that location');
+				return;
+			}
 			hideLoading();
 			var list = $('.stops ul'),
 				html = '',
@@ -145,7 +151,6 @@
 			setLocationMarker();
 			var bounds = new google.maps.LatLngBounds(),
 				stopLatLng;
-				console.log(stopMarkers);
 			$.each(stopMarkers, function(k, stop){
 				if(stop.id == stopId) {
 					stopLatLng = stop.latlng;
