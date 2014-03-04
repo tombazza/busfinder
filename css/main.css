@@ -168,3 +168,9 @@ h2 {
 .markercontainer {
 	width: 250px;
 }
+
+.footer {
+	padding: 5% 2% 2%;
+	font-size: 0.6em;
+	cursor: default;
+}
