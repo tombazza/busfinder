@@ -215,10 +215,13 @@
 	}
 
 	function codeLatLng(latlng) {
-		geocoder.geocode({'latLng': latlng}, function(results, status) {
-			if(status == google.maps.GeocoderStatus.OK) {
-				if(results[1]) {
-					searchBox.val(results[1].formatted_address);
+		$.ajax({
+			dataType: "jsonp",
+			url: 'http://api.postcodes.io/postcodes/lon/' + latlng.lng() + '/lat/' + latlng.lat() + '?callback=?',
+			cache: true,
+			success: function(data) {
+				if(data.result[0]) {
+					searchBox.val(data.result[0].admin_district + ', ' + data.result[0].postcode);
 				}
 			}
 		});
