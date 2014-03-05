@@ -118,6 +118,7 @@
 		$.each(markers, function(k, marker) {
 			marker.setMap(null);
 		});
+		if(infowindow) infowindow.close();
 	}
 	
 	function setLocationMarker() {
