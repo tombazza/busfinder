@@ -33,13 +33,19 @@
 			origin: new google.maps.Point(0,0),
 			anchor: new google.maps.Point(10,10),
 			scaledSize: new google.maps.Size(20, 20)
-		};
+		},
+		templates = {};
 
 	function init() {
 		geocoder = new google.maps.Geocoder();
 		map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
+		loadTemplates();
 		registerHandlers();
+	}
+	
+	function loadTemplates() {
+		templates.mapMarker = $("#map_marker").html();
 	}
 
 	function processSearch(e) {
@@ -55,6 +61,23 @@
 		});
 
 		return false;
+	}
+	
+	function renderStopMarker(stop) {
+		var stopMarker = new google.maps.Marker({
+			position: stop.latlng,
+			map: map,
+			icon: stopMarkerIcon
+		});
+		google.maps.event.addListener(stopMarker, 'click', function() {
+			if(infowindow) infowindow.close();
+			infowindow = new google.maps.InfoWindow({
+				content: Mustache.render(templates.mapMarker, stop),
+				position: stop.latlng
+			});
+			infowindow.open(map);
+		});
+		markers.push(stopMarker);
 	}
 	
 	function searchByLatLng(latlng) {
@@ -81,21 +104,7 @@
 				stop.latlng = new google.maps.LatLng(stop.lat, stop.lng);
 				stopMarkers.push(stop);
 				bounds.extend(stop.latlng);
-				var stopMarker = new google.maps.Marker({
-					position: stop.latlng,
-					map: map,
-					icon: stopMarkerIcon
-				});
-				google.maps.event.addListener(stopMarker, 'click', function() {
-					var templateMapMarker = $("#map_marker").html();
-					if(infowindow) infowindow.close();
-					infowindow = new google.maps.InfoWindow({
-						content: Mustache.render(templateMapMarker, stop),
-						position: stop.latlng
-					});
-					infowindow.open(map);//loadStopData(stop.id);
-				});
-				markers.push(stopMarker);
+				renderStopMarker(stop);
 			});
 			map.fitBounds(bounds);
 			map.setZoom(15);
@@ -126,18 +135,11 @@
 		var bounds = new google.maps.LatLngBounds();
 		bounds.extend(location);
 		$.each(stopMarkers, function(k, stop) {
-			var marker = new google.maps.Marker({
-				position: stop.latlng,
-				map: map,
-				icon: stopMarkerIcon
-			});
-			google.maps.event.addListener(marker, 'click', function() {
-				loadStopData(stop.id);
-			});
-			markers.push(marker);
+			renderStopMarker(stop);
 			bounds.extend(stop.latlng);
 		});
 		map.fitBounds(bounds);
+		map.setZoom(15);
 	}
 	
 	function loadStopData(target) {
