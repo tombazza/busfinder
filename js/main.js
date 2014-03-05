@@ -46,6 +46,8 @@
 	
 	function loadTemplates() {
 		templates.mapMarker = $("#map_marker").html();
+		templates.stopListItem = $('#stop_li').html();
+		templates.busTimeEntry = $('#bus_entry').html();
 	}
 
 	function processSearch(e) {
@@ -92,15 +94,13 @@
 			hideLoading();
 			var list = $('.stops ul'),
 				html = '',
-				template = $('#stop_li').html(),
 				bounds = new google.maps.LatLngBounds();
-			stopLocations = [];
 			stopMarkers = [];
 			list.html('');
 			setLocationMarker();
 			bounds.extend(location);
 			$.each(response, function(key, stop) {
-				html += Mustache.render(template, stop);
+				html += Mustache.render(templates.stopListItem, stop);
 				stop.latlng = new google.maps.LatLng(stop.lat, stop.lng);
 				stopMarkers.push(stop);
 				bounds.extend(stop.latlng);
@@ -109,7 +109,7 @@
 			map.fitBounds(bounds);
 			map.setZoom(15);
 			list.html(html);
-			$('.stops ul li').click(getStopData);
+			$('.stops ul li').click(loadStopData);
 			$('.welcome').remove();
 		});
 	}
@@ -142,11 +142,10 @@
 		map.setZoom(15);
 	}
 	
-	function loadStopData(target) {
-		var stop = $('.stops li[data-stopid="'+target+'"]'),
+	function loadStopData(e) {
+		var stop = $(this),
 			stopId = stop.attr('data-stopid'),
-			url = dataUrl + '?mode=buses&stopid=' + stopId,
-			template = $('#bus_entry').html();
+			url = dataUrl + '?mode=buses&stopid=' + stopId;
 	
 		if(stop.hasClass('open')) {
 			showAllStops();
@@ -165,25 +164,21 @@
 				} else {
 					stop.expected = stop.expected + 'min';
 				}
-				html += Mustache.render(template, stop);
+				html += Mustache.render(templates.busTimeEntry, stop);
 			});
 			html += '</div>';
 			clearAllMarkers();
 			setLocationMarker();
 			var bounds = new google.maps.LatLngBounds(),
-				stopLatLng;
-			$.each(stopMarkers, function(k, stop){
-				if(stop.id == stopId) {
-					stopLatLng = stop.latlng;
+				stopEntry;
+			$.each(stopMarkers, function(k, stopMarkerEntry){
+				if(stopMarkerEntry.id == stopId) {
+					stopEntry = stopMarkerEntry;
 					return false;
 				}
 			});
-			bounds.extend(stopLatLng);
-			markers.push(new google.maps.Marker({
-				position: stopLatLng,
-				map: map,
-				icon: stopMarkerIcon
-			}));
+			bounds.extend(stopEntry.latlng);
+			renderStopMarker(stopEntry);
 			bounds.extend(location);
 			map.fitBounds(bounds);
 			
@@ -194,10 +189,6 @@
 			stop.append(html);
 			hideLoading();
 		});
-	}
-	
-	function getStopData(e) {
-		loadStopData($(this).attr('data-stopid'));
 	}
 	
 	function showLoading() {
@@ -215,6 +206,7 @@
 		e.preventDefault();
 		navigator.geolocation.getCurrentPosition(function(coords) {
 			var latlng = new google.maps.LatLng(coords.coords.latitude, coords.coords.longitude);
+			codeLatLng(latlng);
 			searchByLatLng(latlng);
 		}, errorHandler, {
 			enableHighAccuracy: true, timeout: 10000, maximumAge: 300000
@@ -222,6 +214,16 @@
 		return false;
 	}
 
+	function codeLatLng(latlng) {
+		geocoder.geocode({'latLng': latlng}, function(results, status) {
+			if(status == google.maps.GeocoderStatus.OK) {
+				if(results[1]) {
+					searchBox.val(results[1].formatted_address);
+				}
+			}
+		});
+	}
+	
 	function registerHandlers() {
 		searchBox = $('#search input.search');
 		$('.location').click(handleLocationLookup);
