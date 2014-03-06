@@ -90,6 +90,7 @@ h2 {
 
 .stops {
 	overflow: auto;
+	position: relative;
 }
 
 .stops > p {

@@ -156,7 +156,7 @@
 	
 		if(parentLi.hasClass('open')) {
 			showAllStops();
-			parentLi.parent('ul').removeClass('display');
+			$('.stops li.open .times').slideUp(100);
 			parentLi.removeClass('open');
 			$('.stops .times').remove();
 			return;
@@ -187,11 +187,12 @@
 			bounds.extend(location);
 			map.fitBounds(bounds);
 			
-			$('.stops .open').removeClass('open');
+			$('.stops li.open .times').slideUp(100);
+			parentLi.removeClass('open');
 			$('.stops .times').remove();
-			parentLi.parent('ul').addClass('display');
 			parentLi.addClass('open');
 			parentLi.append(html);
+			$('.stops').scrollTop(parentLi.position().top);
 			hideLoading();
 		});
 	}
@@ -203,8 +204,6 @@
 	function hideLoading() {
 		$('.search-area').removeClass('loading');
 	}
-	
-	/* TODO: add reverse geocoding for lat/lng */
 	
 	function handleLocationLookup(e) {
 		showLoading();
