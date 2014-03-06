@@ -35,17 +35,23 @@
 		
 		<script type="text/mustache" id="stop_li">
 			<li data-stopid="{{id}}">
-				{{#flag}}<div class="flag">{{flag}}</div>{{/flag}}
-				<div class="name">{{name}}</div>
-				{{#towards}}<div class="towards">{{towards}}</div>{{/towards}}
+				<div class="stop">
+					{{#flag}}<div class="flag">{{flag}}</div>{{/flag}}
+					<div class="name">{{name}}</div>
+					{{#towards}}<div class="towards">{{towards}}</div>{{/towards}}
+				</div>
 			</li>
 		</script>
 		
 		<script type="text/mustache" id="bus_entry">
-			<div class="bus">
-				<span class="route">{{route}}</span>
-				<span class="dest">{{destination}}</span>
-				<span class="expected">{{expected}}</span>
+			<div class="times">
+				{{#buses}}
+				<div class="bus">
+					<span class="route">{{route}}</span>
+					<span class="dest">{{destination}}</span>
+					<span class="expected">{{expected}}</span>
+				</div>
+				{{/buses}}
 			</div>
 		</script>
 

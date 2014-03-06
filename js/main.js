@@ -158,16 +158,14 @@
 		
 		showLoading();
 		$.getJSON(url, function(response) {
-			var html = '<div class="buses">';
 			$.each(response, function(key, stop) {
 				if(stop.expected < 1) {
-					stop.expected = 'Due';
+					response[key].expected = 'Due';
 				} else {
-					stop.expected = stop.expected + 'min';
+					response[key].expected = stop.expected + 'min';
 				}
-				html += Mustache.render(templates.busTimeEntry, stop);
 			});
-			html += '</div>';
+			var html = Mustache.render(templates.busTimeEntry, {buses:response});
 			clearAllMarkers();
 			setLocationMarker();
 			var bounds = new google.maps.LatLngBounds(),
