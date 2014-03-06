@@ -45,7 +45,13 @@
 			var mapContainer = $('#map-canvas');
 			map = new google.maps.Map(mapContainer.get(0), mapOptions);
 			mapContainer.addClass('show');
+			resizeStopArea();
 		}
+	}
+	
+	function resizeStopArea() {
+		var stops = $('.stops');
+		stops.height(($('body').height() - stops.offset().top));
 	}
 	
 	function loadTemplates() {
@@ -227,6 +233,7 @@
 	}
 	
 	function registerHandlers() {
+		$(window).resize(resizeStopArea());
 		searchBox = $('#search input.search');
 		$('.location').click(handleLocationLookup);
 		$('#search').submit(processSearch);
