@@ -9,8 +9,6 @@
 		dataUrl = '/data.php',
 		infowindow,
 		mapOptions = {
-			zoom: 10,
-			center: new google.maps.LatLng(51.516281, -0.132945),
 			styles: [
 				{"featureType": "poi", "stylers": [{"visibility": "off"}]},
 				{"featureType": "poi.park", "elementType": "geometry", "stylers": [{"visibility": "on"}]},
@@ -37,10 +35,17 @@
 
 	function init() {
 		geocoder = new google.maps.Geocoder();
-		map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
 		loadTemplates();
 		registerHandlers();
+	}
+	
+	function loadMap() {
+		if(!map) {
+			var mapContainer = $('#map-canvas');
+			map = new google.maps.Map(mapContainer.get(0), mapOptions);
+			mapContainer.addClass('show');
+		}
 	}
 	
 	function loadTemplates() {
@@ -92,21 +97,16 @@
 			}
 			hideLoading();
 			var list = $('.stops ul'),
-				html = '',
-				bounds = new google.maps.LatLngBounds();
+				html = '';
 			stopMarkers = [];
 			list.html('');
-			setLocationMarker();
-			bounds.extend(location);
 			$.each(response, function(key, stop) {
 				html += Mustache.render(templates.stopListItem, stop);
 				stop.latlng = new google.maps.LatLng(stop.lat, stop.lng);
 				stopMarkers.push(stop);
-				bounds.extend(stop.latlng);
-				renderStopMarker(stop);
 			});
-			map.fitBounds(bounds);
-			map.setZoom(15);
+			loadMap();
+			showAllStops();
 			list.html(html);
 			$('.stops ul li .stop').click(loadStopData);
 			$('.welcome').remove();
@@ -138,7 +138,7 @@
 			renderStopMarker(stop);
 			bounds.extend(stop.latlng);
 		});
-		map.fitBounds(bounds);
+		map.setCenter(bounds.getCenter());
 		map.setZoom(15);
 	}
 	

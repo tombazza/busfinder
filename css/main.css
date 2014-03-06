@@ -76,9 +76,14 @@ h2 {
 }
 
 .map {
+	display: none;
 	width: 100%;
 	padding-bottom: 55%;
 	border-bottom: 3px solid #FFFFFF;
+}
+
+.map.show {
+	display: block;
 }
 
 .stops p {
