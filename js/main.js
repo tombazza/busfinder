@@ -148,7 +148,7 @@
 			stopId = parentLi.attr('data-stopid'),
 			url = dataUrl + '?mode=buses&stopid=' + stopId;
 	
-		if(stop.hasClass('open')) {
+		if(parentLi.hasClass('open')) {
 			showAllStops();
 			parentLi.parent('ul').removeClass('display');
 			parentLi.removeClass('open');

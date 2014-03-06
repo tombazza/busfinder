@@ -82,13 +82,12 @@ h2 {
 }
 
 .stops p {
-	padding: 0 2% 0;
+	padding: 2%;
 }
 
 .stops ul li {
 	background-color: #5C0B0D;
 	border-bottom: 1px solid #330607;
-	position: relative;
 }
 
 .stops ul li .stop {
@@ -144,14 +143,23 @@ h2 {
 .times {
 	background-color: #FFFFFF;
 	color: #3e3e3e;
-	padding: 2%;
+	padding: 1% 2%;
 	font-size: 0.9em;
+}
+
+.stops .bus {
+	border-bottom: 1px solid #dddddd;
+	padding: 1% 0;
+}
+
+.stops .bus:last-child {
+	border-bottom-width: 0;
 }
 
 .stops .bus .route {
 	float: left;
 	font-weight: bold;
-	width: 35px;
+	width: 45px;
 }
 
 .stops .bus .expected {
