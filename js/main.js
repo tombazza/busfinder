@@ -84,8 +84,7 @@
 	
 	function searchByLatLng(latlng) {
 		location = latlng;
-		var url = dataUrl + '?mode=stops&lat=' + latlng.lat() + '&lng=' + latlng.lng();
-		$.getJSON(url, function(response) {
+		$.getJSON(dataUrl + '?mode=stops&lat=' + latlng.lat() + '&lng=' + latlng.lng(), function(response) {
 			if(response.length == 0) {
 				hideLoading();
 				alert('Sorry no stops were found for that location');
@@ -109,7 +108,7 @@
 			map.fitBounds(bounds);
 			map.setZoom(15);
 			list.html(html);
-			$('.stops ul li').click(loadStopData);
+			$('.stops ul li .stop').click(loadStopData);
 			$('.welcome').remove();
 		});
 	}
@@ -165,11 +164,11 @@
 					response[key].expected = stop.expected + 'min';
 				}
 			});
-			var html = Mustache.render(templates.busTimeEntry, {buses:response});
+			var html = Mustache.render(templates.busTimeEntry, { buses: response }),
+				bounds = new google.maps.LatLngBounds(),
+				stopEntry;
 			clearAllMarkers();
 			setLocationMarker();
-			var bounds = new google.maps.LatLngBounds(),
-				stopEntry;
 			$.each(stopMarkers, function(k, stopMarkerEntry){
 				if(stopMarkerEntry.id == stopId) {
 					stopEntry = stopMarkerEntry;

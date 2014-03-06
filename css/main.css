@@ -89,11 +89,11 @@ h2 {
 	background-color: #5C0B0D;
 	border-bottom: 1px solid #330607;
 	position: relative;
-	cursor: pointer;
 }
 
 .stops ul li .stop {
 	padding: 2%;
+	cursor: pointer;
 }
 
 .stops .flag, .gm-style-iw .flag {
