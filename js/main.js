@@ -3,7 +3,6 @@
 		geocoder,
 		searchBox,
 		map,
-		stopLocations = [],
 		stopMarkers = [],
 		markers = [],
 		location,
@@ -52,6 +51,7 @@
 
 	function processSearch(e) {
 		showLoading();
+		searchBox.blur();
 		e.preventDefault();
 		geocoder.geocode({'address': searchBox.val() + ', UK'}, function(results, status) {
 			if (status == google.maps.GeocoderStatus.OK) {
