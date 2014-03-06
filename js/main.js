@@ -144,13 +144,14 @@
 	
 	function loadStopData(e) {
 		var stop = $(this),
-			stopId = stop.attr('data-stopid'),
+			parentLi = stop.parent('li'),
+			stopId = parentLi.attr('data-stopid'),
 			url = dataUrl + '?mode=buses&stopid=' + stopId;
 	
 		if(stop.hasClass('open')) {
 			showAllStops();
-			stop.parent('ul').removeClass('display');
-			stop.removeClass('open');
+			parentLi.parent('ul').removeClass('display');
+			parentLi.removeClass('open');
 			$('.stops .times').remove();
 			return;
 		}
@@ -181,10 +182,10 @@
 			map.fitBounds(bounds);
 			
 			$('.stops .open').removeClass('open');
-			$('.stops .buses').remove();
-			stop.parent('ul').addClass('display');
-			stop.addClass('open');
-			stop.append(html);
+			$('.stops .times').remove();
+			parentLi.parent('ul').addClass('display');
+			parentLi.addClass('open');
+			parentLi.append(html);
 			hideLoading();
 		});
 	}
