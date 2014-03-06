@@ -156,7 +156,7 @@
 	
 		if(parentLi.hasClass('open')) {
 			showAllStops();
-			$('.stops li.open .times').slideUp(100);
+			$('.stops li.open .times').slideUp(500);
 			parentLi.removeClass('open');
 			$('.stops .times').remove();
 			return;
@@ -187,12 +187,12 @@
 			bounds.extend(location);
 			map.fitBounds(bounds);
 			
-			$('.stops li.open .times').slideUp(100);
+			$('.stops li.open .times').slideUp(500);
 			parentLi.removeClass('open');
 			$('.stops .times').remove();
 			parentLi.addClass('open');
 			parentLi.append(html);
-			$('.stops').scrollTop(parentLi.position().top);
+			$('.stops').scrollTop($('.stops').scrollTop() + parentLi.position().top);
 			hideLoading();
 		});
 	}
