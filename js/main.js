@@ -152,7 +152,7 @@
 			showAllStops();
 			stop.parent('ul').removeClass('display');
 			stop.removeClass('open');
-			$('.stops .buses').remove();
+			$('.stops .times').remove();
 			return;
 		}
 		

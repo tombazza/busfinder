@@ -87,10 +87,13 @@ h2 {
 
 .stops ul li {
 	background-color: #5C0B0D;
-	padding: 2%;
 	border-bottom: 1px solid #330607;
 	position: relative;
 	cursor: pointer;
+}
+
+.stops ul li .stop {
+	padding: 2%;
 }
 
 .stops .flag, .gm-style-iw .flag {
@@ -118,7 +121,7 @@ h2 {
 	border-bottom-width: 0;
 }
 
-.stops ul li:before {
+.stops ul li .stop:before {
 	width: 0px;
 	height: 0px;
 	border-style: solid;
@@ -133,16 +136,15 @@ h2 {
 	display: block;
 }
 
-.stops ul li.open:before {
+.stops ul li.open .stop:before {
 	border-width: 0 5px 8.7px 5px;
 	border-color: transparent transparent #ffffff transparent;
 }
 
-.buses {
+.times {
 	background-color: #FFFFFF;
 	color: #3e3e3e;
 	padding: 2%;
-	margin: 2% -2% -2%;
 	font-size: 0.9em;
 }
 
