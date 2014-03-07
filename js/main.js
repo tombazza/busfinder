@@ -233,6 +233,9 @@
 	
 	function registerHandlers() {
 		$(window).resize(resizeStopArea());
+		$(document).on('click', '.map .markercontainer', function() {
+			$('.stops li[data-stopid="'+$(this).attr('data-stopid')+'"] .stop').trigger('click');
+		});
 		searchBox = $('#search input.search');
 		$('.location').click(handleLocationLookup);
 		$('#search').submit(processSearch);

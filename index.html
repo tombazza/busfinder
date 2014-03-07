@@ -57,9 +57,10 @@
 		</script>
 
 		<script type="text/mustache" id="map_marker">
-		<div class="markercontainer">
-			{{#flag}}<div class="flag">{{flag}}</div>{{/flag}}
-			<div class="name">{{name}}</div></div>
+			<div class="markercontainer" data-stopid="{{id}}">
+				{{#flag}}<div class="flag">{{flag}}</div>{{/flag}}
+				<div class="name"><span>{{name}}</span></div>
+			</div>
 		</script>
 	</body>
 </html>
