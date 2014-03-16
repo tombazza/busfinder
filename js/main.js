@@ -192,7 +192,7 @@
 			$('.stops .times').remove();
 			parentLi.addClass('open');
 			parentLi.append(html);
-			$('.stops').scrollTop($('.stops').scrollTop() + parentLi.position().top);
+			$('.stops').animate({ scrollTop: $('.stops').scrollTop() + parentLi.position().top });
 			hideLoading();
 		});
 	}
