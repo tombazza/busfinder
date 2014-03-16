@@ -31,7 +31,10 @@
 			anchor: new google.maps.Point(10,10),
 			scaledSize: new google.maps.Size(20, 20)
 		},
-		templates = {};
+		templates = {},
+		stopAnimationFinished = true,
+		stopRenderTimer,
+		stopUpdateTimer;
 
 	function init() {
 		geocoder = new google.maps.Geocoder();
@@ -147,54 +150,87 @@
 		map.setCenter(bounds.getCenter());
 		map.setZoom(15);
 	}
+		
+	function closeAllOpenStops(callback) {
+		var stopsOpen = $('.stops li.open .times');
+		if(stopsOpen.length > 0) {
+			showAllStops();
+			$('.stops li').removeClass('open');
+			stopAnimationFinished = false;
+			stopsOpen.slideUp({
+				duration: 250,
+				complete: function() {
+					$('.stops li').not('.open').find('.times').remove();
+					stopAnimationFinished = true;
+				}
+			});
+		}
+	}
 	
-	function loadStopData(e) {
-		var stop = $(this),
-			parentLi = stop.parent('li'),
+	function retreiveStopData(stop, update) {
+		var	parentLi = stop.parent('li'),
 			stopId = parentLi.attr('data-stopid'),
 			url = dataUrl + '?mode=buses&stopid=' + stopId;
-	
-		if(parentLi.hasClass('open')) {
-			showAllStops();
-			$('.stops li.open .times').slideUp(500);
-			parentLi.removeClass('open');
-			$('.stops .times').remove();
-			return;
-		}
 		
 		showLoading();
 		$.getJSON(url, function(response) {
-			$.each(response, function(key, stop) {
-				if(stop.expected < 1) {
+			$.each(response, function(key, bus) {
+				if(bus.expected < 1) {
 					response[key].expected = 'Due';
 				} else {
-					response[key].expected = stop.expected + 'min';
+					response[key].expected = bus.expected + 'min';
 				}
 			});
+			
 			var html = tpl.render(templates.busTimeEntry, { buses: response }),
 				bounds = new google.maps.LatLngBounds(),
 				stopEntry;
-			clearAllMarkers();
-			setLocationMarker();
-			$.each(stopMarkers, function(k, stopMarkerEntry){
-				if(stopMarkerEntry.id == stopId) {
-					stopEntry = stopMarkerEntry;
-					return false;
-				}
-			});
-			bounds.extend(stopEntry.latlng);
-			renderStopMarker(stopEntry);
-			bounds.extend(location);
-			map.fitBounds(bounds);
+
+			if(update) {
+				parentLi.find('.times').remove();
+				parentLi.append(html);
+				hideLoading();
+			} else {
+				clearAllMarkers();
+				setLocationMarker();
+				$.each(stopMarkers, function(k, stopMarkerEntry){
+					if(stopMarkerEntry.id == stopId) {
+						stopEntry = stopMarkerEntry;
+						return false;
+					}
+				});
+
+				bounds.extend(stopEntry.latlng);
+				renderStopMarker(stopEntry);
+				bounds.extend(location);
+				map.fitBounds(bounds);
+				
+				stopRenderTimer = setInterval(function() {
+					if(stopAnimationFinished) {
+						parentLi.addClass('open');
+						parentLi.append(html);
+						$('.stops').animate({ scrollTop: $('.stops').scrollTop() + parentLi.position().top });
+						clearInterval(stopRenderTimer);
+						hideLoading();
+					}
+				}, 20);
+			}
 			
-			$('.stops li.open .times').slideUp(500);
-			parentLi.removeClass('open');
-			$('.stops .times').remove();
-			parentLi.addClass('open');
-			parentLi.append(html);
-			$('.stops').animate({ scrollTop: $('.stops').scrollTop() + parentLi.position().top });
-			hideLoading();
+			stopUpdateTimer = setTimeout(function() {
+				retreiveStopData(stop, true);
+			}, 15000);
 		});
+	}
+
+	function loadStopData(e) {
+		var stop = $(this),
+			preventLoading = stop.parent('li').hasClass('open');
+	
+		clearTimeout(stopUpdateTimer);
+		closeAllOpenStops();
+		if(!preventLoading) {
+			retreiveStopData(stop, false);
+		}
 	}
 	
 	function showLoading() {
@@ -248,10 +284,6 @@
 			if (searchBox.val() == defaultSearchText) {
 				searchBox.val('');
 			}
-		});
-		
-		$('.stops li').click(function() {
-			$(this).toggleClass('open');
 		});
 	}
 
