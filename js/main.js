@@ -1,4 +1,4 @@
-(function($) {
+(function($, tpl) {
 	var defaultSearchText = 'Enter your location...',
 		geocoder,
 		searchBox,
@@ -85,7 +85,7 @@
 		google.maps.event.addListener(stopMarker, 'click', function() {
 			if(infowindow) infowindow.close();
 			infowindow = new google.maps.InfoWindow({
-				content: Mustache.render(templates.mapMarker, stop),
+				content: tpl.render(templates.mapMarker, stop),
 				position: stop.latlng
 			});
 			infowindow.open(map);
@@ -107,7 +107,7 @@
 			stopMarkers = [];
 			list.html('');
 			$.each(response, function(key, stop) {
-				html += Mustache.render(templates.stopListItem, stop);
+				html += tpl.render(templates.stopListItem, stop);
 				stop.latlng = new google.maps.LatLng(stop.lat, stop.lng);
 				stopMarkers.push(stop);
 			});
@@ -171,7 +171,7 @@
 					response[key].expected = stop.expected + 'min';
 				}
 			});
-			var html = Mustache.render(templates.busTimeEntry, { buses: response }),
+			var html = tpl.render(templates.busTimeEntry, { buses: response }),
 				bounds = new google.maps.LatLngBounds(),
 				stopEntry;
 			clearAllMarkers();
@@ -274,4 +274,4 @@
 	}
 
 	$(document).ready(init);
-})(jQuery);
+})(jQuery, Mustache);
