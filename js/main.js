@@ -34,11 +34,12 @@
 		templates = {},
 		stopAnimationFinished = true,
 		stopRenderTimer,
-		stopUpdateTimer;
+		stopUpdateTimer,
+		locationAccuracy = false,
+		locationRadius = false;
 
 	function init() {
 		geocoder = new google.maps.Geocoder();
-
 		loadTemplates();
 		registerHandlers();
 	}
@@ -67,6 +68,7 @@
 		showLoading();
 		searchBox.blur();
 		e.preventDefault();
+		locationAccuracy = false;
 		geocoder.geocode({'address': searchBox.val() + ', UK'}, function(results, status) {
 			if (status == google.maps.GeocoderStatus.OK) {
 				searchByLatLng(results[0].geometry.location);
@@ -130,6 +132,18 @@
 	}
 	
 	function setLocationMarker() {
+		if(locationAccuracy) {
+			locationRadius = new google.maps.Circle({
+				strokeColor: '#9C1216',
+				strokeOpacity: 0.7,
+				strokeWeight: 0.5,
+				fillColor: '#9C1216',
+				fillOpacity: 0.35,
+				map: map,
+				center: location,
+				radius: parseInt(locationAccuracy)
+			});
+		}
 		markers.push(new google.maps.Marker({
 			position: location,
 			map: map,
@@ -147,11 +161,14 @@
 			renderStopMarker(stop);
 			bounds.extend(stop.latlng);
 		});
+		if(locationRadius) {
+			bounds.union(locationRadius.getBounds());
+		}
 		map.setCenter(bounds.getCenter());
 		map.setZoom(15);
 	}
 		
-	function closeAllOpenStops(callback) {
+	function closeAllOpenStops() {
 		var stopsOpen = $('.stops li.open .times');
 		if(stopsOpen.length > 0) {
 			showAllStops();
@@ -203,6 +220,9 @@
 				bounds.extend(stopEntry.latlng);
 				renderStopMarker(stopEntry);
 				bounds.extend(location);
+				if(locationRadius) {
+					bounds.union(locationRadius.getBounds());
+				}
 				map.fitBounds(bounds);
 				
 				stopRenderTimer = setInterval(function() {
@@ -244,8 +264,10 @@
 	function handleLocationLookup(e) {
 		showLoading();
 		e.preventDefault();
-		navigator.geolocation.getCurrentPosition(function(coords) {
-			var latlng = new google.maps.LatLng(coords.coords.latitude, coords.coords.longitude);
+		navigator.geolocation.getCurrentPosition(function(position) {
+			var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+			locationAccuracy = position.coords.accuracy;
+			console.log(locationAccuracy);
 			codeLatLng(latlng);
 			searchByLatLng(latlng);
 		}, errorHandler, {
