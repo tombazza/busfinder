@@ -42,6 +42,10 @@
 		geocoder = new google.maps.Geocoder();
 		loadTemplates();
 		registerHandlers();
+		
+		if(window.navigator.standalone) {
+			$('.header').css('padding-top', '15px');
+		}
 	}
 	
 	function loadMap() {
