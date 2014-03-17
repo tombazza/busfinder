@@ -136,12 +136,16 @@
 	}
 	
 	function setLocationMarker() {
-		if(locationAccuracy) {
+		if(locationAccuracy && locationAccuracy < 500) {
+			if(locationRadius) {
+				locationRadius.setMap(null);
+				locationRadius = null;
+			}
 			locationRadius = new google.maps.Circle({
-				strokeColor: '#9C1216',
+				strokeColor: '#ace3fc',
 				strokeOpacity: 0.7,
 				strokeWeight: 0.5,
-				fillColor: '#9C1216',
+				fillColor: '#b2d0de',
 				fillOpacity: 0.35,
 				map: map,
 				center: location,
