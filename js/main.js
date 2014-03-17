@@ -36,7 +36,8 @@
 		stopRenderTimer,
 		stopUpdateTimer,
 		locationAccuracy = false,
-		locationRadius = false;
+		locationRadius = false,
+		ajaxTimeoutLimit = 3000;
 
 	function init() {
 		geocoder = new google.maps.Geocoder();
@@ -108,27 +109,33 @@
 	
 	function searchByLatLng(latlng) {
 		location = latlng;
-		$.getJSON(dataUrl + '?mode=stops&lat=' + latlng.lat() + '&lng=' + latlng.lng(), function(response) {
-			if(response.length == 0) {
+		$.ajax({
+			url: dataUrl + '?mode=stops&lat=' + latlng.lat() + '&lng=' + latlng.lng(),
+			dataType: 'json',
+			success: function(response) {
+				if(response.length == 0) {
+					hideLoading();
+					alert('Sorry no stops were found for that location');
+					return;
+				}
 				hideLoading();
-				alert('Sorry no stops were found for that location');
-				return;
-			}
-			hideLoading();
-			var list = $('.stops ul'),
-				html = '';
-			stopMarkers = [];
-			list.html('');
-			$.each(response, function(key, stop) {
-				html += tpl.render(templates.stopListItem, stop);
-				stop.latlng = new google.maps.LatLng(stop.lat, stop.lng);
-				stopMarkers.push(stop);
-			});
-			loadMap();
-			showAllStops();
-			list.html(html);
-			$('.stops ul li .stop').click(loadStopData);
-			$('.welcome').remove();
+				var list = $('.stops ul'),
+					html = '';
+				stopMarkers = [];
+				list.html('');
+				$.each(response, function(key, stop) {
+					html += tpl.render(templates.stopListItem, stop);
+					stop.latlng = new google.maps.LatLng(stop.lat, stop.lng);
+					stopMarkers.push(stop);
+				});
+				loadMap();
+				showAllStops();
+				list.html(html);
+				$('.stops ul li .stop').click(loadStopData);
+				$('.welcome').remove();
+			},
+			timeout: ajaxTimeoutLimit,
+			error: ajaxErrorHandler
 		});
 	}
 	
@@ -199,58 +206,64 @@
 	function retreiveStopData(stop, update) {
 		var	parentLi = stop.parent('li'),
 			stopId = parentLi.attr('data-stopid'),
-			url = dataUrl + '?mode=buses&stopid=' + stopId;
+			url = 
 		
 		showLoading();
-		$.getJSON(url, function(response) {
-			$.each(response, function(key, bus) {
-				if(bus.expected < 1) {
-					response[key].expected = 'Due';
-				} else {
-					response[key].expected = bus.expected + 'min';
-				}
-			});
-			
-			var html = tpl.render(templates.busTimeEntry, { buses: response }),
-				bounds = new google.maps.LatLngBounds(),
-				stopEntry;
-
-			if(update) {
-				parentLi.find('.times').remove();
-				parentLi.append(html);
-				hideLoading();
-			} else {
-				clearAllMarkers();
-				setLocationMarker();
-				$.each(stopMarkers, function(k, stopMarkerEntry){
-					if(stopMarkerEntry.id == stopId) {
-						stopEntry = stopMarkerEntry;
-						return false;
+		$.ajax({
+			url: dataUrl + '?mode=buses&stopid=' + stopId,
+			dataType: 'json',
+			success: function(response) {
+				$.each(response, function(key, bus) {
+					if(bus.expected < 1) {
+						response[key].expected = 'Due';
+					} else {
+						response[key].expected = bus.expected + 'min';
 					}
 				});
 
-				bounds.extend(stopEntry.latlng);
-				renderStopMarker(stopEntry);
-				bounds.extend(location);
-				if(locationRadius) {
-					bounds.union(locationRadius.getBounds());
-				}
-				map.fitBounds(bounds);
-				
-				stopRenderTimer = setInterval(function() {
-					if(stopAnimationFinished) {
-						parentLi.addClass('open');
-						parentLi.append(html);
-						$('.stops').animate({ scrollTop: $('.stops').scrollTop() + parentLi.position().top });
-						clearInterval(stopRenderTimer);
-						hideLoading();
+				var html = tpl.render(templates.busTimeEntry, { buses: response }),
+					bounds = new google.maps.LatLngBounds(),
+					stopEntry;
+
+				if(update) {
+					parentLi.find('.times').remove();
+					parentLi.append(html);
+					hideLoading();
+				} else {
+					clearAllMarkers();
+					setLocationMarker();
+					$.each(stopMarkers, function(k, stopMarkerEntry){
+						if(stopMarkerEntry.id == stopId) {
+							stopEntry = stopMarkerEntry;
+							return false;
+						}
+					});
+
+					bounds.extend(stopEntry.latlng);
+					renderStopMarker(stopEntry);
+					bounds.extend(location);
+					if(locationRadius) {
+						bounds.union(locationRadius.getBounds());
 					}
-				}, 20);
-			}
-			
-			stopUpdateTimer = setTimeout(function() {
-				retreiveStopData(stop, true);
-			}, 15000);
+					map.fitBounds(bounds);
+
+					stopRenderTimer = setInterval(function() {
+						if(stopAnimationFinished) {
+							parentLi.addClass('open');
+							parentLi.append(html);
+							$('.stops').animate({ scrollTop: $('.stops').scrollTop() + parentLi.position().top });
+							clearInterval(stopRenderTimer);
+							hideLoading();
+						}
+					}, 20);
+				}
+
+				stopUpdateTimer = setTimeout(function() {
+					retreiveStopData(stop, true);
+				}, 15000);
+			},
+			timeout: ajaxTimeoutLimit,
+			error: ajaxErrorHandler
 		});
 	}
 
@@ -302,8 +315,17 @@
 				if(data.result[0]) {
 					searchBox.val(data.result[0].admin_district + ', ' + data.result[0].postcode);
 				}
-			}
+			},
+			timeout: ajaxTimeoutLimit,
+			error: ajaxErrorHandler
 		});
+	}
+	
+	function ajaxErrorHandler(xhr, status, errorThrown) {
+		if(status == 'timeout') {
+			alert('Sorry but the server took too long to respond. \n\nPlease try again later.');
+		}
+		hideLoading();
 	}
 	
 	function registerHandlers() {
