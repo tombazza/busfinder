@@ -73,6 +73,10 @@
 		searchBox.blur();
 		e.preventDefault();
 		locationAccuracy = false;
+		if(locationRadius) {
+			locationRadius.setMap(null);
+			locationRadius = null;
+		}
 		geocoder.geocode({'address': searchBox.val() + ', UK'}, function(results, status) {
 			if (status == google.maps.GeocoderStatus.OK) {
 				searchByLatLng(results[0].geometry.location);
@@ -272,6 +276,11 @@
 	function handleLocationLookup(e) {
 		showLoading();
 		e.preventDefault();
+		locationAccuracy = false;
+		if(locationRadius) {
+			locationRadius.setMap(null);
+			locationRadius = null;
+		}
 		navigator.geolocation.getCurrentPosition(function(position) {
 			var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 			locationAccuracy = position.coords.accuracy;

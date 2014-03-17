@@ -185,7 +185,8 @@ h2 {
 .gm-style-iw .name {
 	color: #3E3E3E;
 	padding: 1% 1% 1% 0;
-	width: 200px;
+	width: 185px;
+	padding-right: 15px;
 }
 
 .markercontainer {
