@@ -114,7 +114,6 @@ h2 {
 	float: left;
 	display: block;
 	padding: 1%;
-	font-size: 0.8em;
 	font-weight: bold !important;
 	width: 20px;
 	height: 20px;
@@ -180,6 +179,10 @@ h2 {
 
 .gm-style-iw, .gm-style-iw div {
 	overflow: hidden !important;
+}
+
+.gm-style-iw {
+	height: 30px !important;
 }
 
 .gm-style-iw .name {
