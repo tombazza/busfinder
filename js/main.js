@@ -329,7 +329,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	function codeLatLng(latlng) {
 		$.ajax({
 			dataType: "jsonp",
-			url: 'http://api.postcodes.io/postcodes/lon/' + latlng.lng() + '/lat/' + latlng.lat() + '?callback=?',
+			url: 'https://api.postcodes.io/postcodes/lon/' + latlng.lng() + '/lat/' + latlng.lat() + '?callback=?',
 			cache: true,
 			success: function(data) {
 				if(data.result[0]) {
